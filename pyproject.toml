@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enerq"
+version = "0.1.0"
+description = "Energy derivatives pricing & risk library: Black-76, Asian options, gas storage (LSMC) and battery storage (MILP)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Changwei Pan", email = "changweipan3@gmail.com" }]
+dependencies = ["numpy>=1.26", "scipy>=1.11", "pandas>=2.1"]
+
+[project.optional-dependencies]
+api = ["fastapi>=0.110", "pydantic>=2.5", "uvicorn>=0.27"]
+dev = ["pytest>=8", "hypothesis>=6.90", "pytest-benchmark>=4", "ruff>=0.4", "mypy>=1.8", "httpx>=0.27", "pre-commit>=3.6"]
+
+[project.scripts]
+enerq = "enerq.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+enerq = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --benchmark-disable"
+markers = ["slow: Monte Carlo / optimisation heavy tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "NPY", "RUF", "PERF"]
+ignore = ["N803", "N806"]  # allow K, T, F as in the maths
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+plugins = []
+
+[[tool.mypy.overrides]]
+module = ["scipy.*", "pandas.*", "hypothesis.*"]
+ignore_missing_imports = true
