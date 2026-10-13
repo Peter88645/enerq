@@ -5,9 +5,14 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -22,4 +27,4 @@ jobs:
       - run: ruff check .
       - run: ruff format --check .
       - run: mypy src
-      - run: pytest
+      - run: pytest -v --durations=5

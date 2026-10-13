@@ -27,7 +27,9 @@ enerq = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q --benchmark-disable"
+addopts = "-q"
+# Dump every thread's stack if a single test runs for over 2 minutes (diagnoses hangs in CI).
+faulthandler_timeout = 120
 markers = ["slow: Monte Carlo / optimisation heavy tests"]
 
 [tool.ruff]

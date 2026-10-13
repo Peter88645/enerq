@@ -14,6 +14,7 @@ CPU-bound NumPy/HiGHS code, and frozen instruments/market data pickle cheaply.
 from __future__ import annotations
 
 import logging
+import multiprocessing as mp
 import time
 from collections.abc import Callable, Iterable, Sequence
 from concurrent.futures import ProcessPoolExecutor
@@ -110,7 +111,10 @@ def price_batch(jobs: Sequence[Job], *, workers: int | None = 1) -> list[Pricing
     if workers == 1 or len(jobs) <= 1:
         return [_price_job(j) for j in jobs]
     chunk = max(1, len(jobs) // (4 * (workers or 8)))
-    with ProcessPoolExecutor(max_workers=workers) as pool:
+    # "spawn" rather than the Linux default "fork": forking a process that already runs threads
+    # (BLAS, HiGHS, a web server) can deadlock the children. Workers start clean instead.
+    ctx = mp.get_context("spawn")
+    with ProcessPoolExecutor(max_workers=workers, mp_context=ctx) as pool:
         return list(pool.map(_price_job, jobs, chunksize=chunk))
 
 
